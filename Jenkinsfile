@@ -5,8 +5,8 @@ pipeline {
         stage('Debug Environment') {
             steps {
                 echo 'Checking Python availability and workspace...'
-                bat '''
-                    echo Current directory: %cd%
+                sh '''
+                    echo Current directory: $(pwd)
                     echo Python version:
                     python --version
                 '''
@@ -16,21 +16,21 @@ pipeline {
         stage('Run HelloWorld') {
             steps {
                 echo 'Running helloworld.py...'
-                bat 'python helloworld.py'
+                sh 'python helloworld.py'
             }
         }
 
         stage('Run HelloWipro') {
             steps {
                 echo 'Running hellowipro.py...'
-                bat 'python hellowipro.py'
+                sh 'python hellowipro.py'
             }
         }
 
         stage('Run HelloJenkins') {
             steps {
                 echo 'Running hellowjenkins.py...'
-                bat 'python hellowjenkins.py'
+                sh 'python hellowjenkins.py'
             }
         }
     }
@@ -38,7 +38,7 @@ pipeline {
     post {
         always {
             echo 'Build completed. Logging status...'
-            bat 'echo Build completed at %date% %time% >> build_status.txt'
+            sh 'echo Build completed at $(date) >> build_status.txt'
         }
         success {
             echo 'All scripts ran successfully!'
