@@ -5,8 +5,6 @@ pipeline {
         stage('Debug Environment') {
             steps {
                 echo 'Checking Python availability and workspace...'
-                echo Current directory: $(pwd)
-                echo Python version:
                 python --version
             }
         }
