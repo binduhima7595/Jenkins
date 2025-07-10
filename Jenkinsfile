@@ -1,65 +1,132 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "C:\\Windows\\System32;${env.PATH}"
+    }
+
     stages {
-        stage('Debug Environment') {
+        stage('Checkout Source') {
             steps {
-                echo 'Checking Python availability and shell environment...'
-                sh '''
-                    echo "Current working directory:"
-                    pwd
-
-                    echo "Shell PATH:"
-                    echo "$PATH"
-
-                    echo "Trying to locate python..."
-                    which python || echo "Python not found in PATH"
-
-                    echo "Trying to run 'python --version'..."
-                    python --version || echo "Unable to execute python"
-
-                    echo "Listing workspace contents..."
-                    ls -l
-                '''
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/binduhima7595/Jenkins.git',
+                        credentialsId: '8984cfd0-daed-4433-b4d1-f7b42c188c9e'
+                    ]]
+                ])
             }
         }
 
         stage('Run HelloWorld') {
             steps {
-                echo 'Running helloworld.py...'
-                sh 'python helloworld.py'
+                script {
+                    def isWindows = !isUnix()
+                    if (isWindows) {
+                        bat '''
+                            if exist helloworld.py (
+                                python helloworld.py
+                            ) else (
+                                echo File 'helloworld.py' not found. Skipping stage.
+                                exit /b 1
+                            )
+                        '''
+                    } else {
+                        sh '''
+                            if [ -f helloworld.py ]; then
+                                python helloworld.py
+                            else
+                                echo "File 'helloworld.py' not found. Skipping stage."
+                                exit 1
+                            fi
+                        '''
+                    }
+                }
             }
         }
 
         stage('Run HelloWipro') {
             steps {
-                echo 'Running hellowipro.py...'
-                sh 'python hellowipro.py'
+                script {
+                    def isWindows = !isUnix()
+                    if (isWindows) {
+                        bat '''
+                            if exist hellowipro.py (
+                                python hellowipro.py
+                            ) else (
+                                echo File 'hellowipro.py' not found. Skipping stage.
+                                exit /b 1
+                            )
+                        '''
+                    } else {
+                        sh '''
+                            if [ -f hellowipro.py ]; then
+                                python hellowipro.py
+                            else
+                                echo "File 'hellowipro.py' not found. Skipping stage."
+                                exit 1
+                            fi
+                        '''
+                    }
+                }
             }
         }
 
         stage('Run HelloJenkins') {
             steps {
-                echo 'Running hellowjenkins.py...'
-                sh 'python hellowjenkins.py'
+                script {
+                    def isWindows = !isUnix()
+                    if (isWindows) {
+                        bat '''
+                            if exist hellojenkins.py (
+                                python hellojenkins.py
+                            ) else (
+                                echo File 'hellojenkins.py' not found. Skipping stage.
+                                exit /b 1
+                            )
+                        '''
+                    } else {
+                        sh '''
+                            if [ -f hellojenkins.py ]; then
+                                python hellojenkins.py
+                            else
+                                echo "File 'hellojenkins.py' not found. Skipping stage."
+                                exit 1
+                            fi
+                        '''
+                    }
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'Build completed. Logging status...'
-            sh '''
-                echo "Build completed at $(date)" >> build_status.txt
-                echo "Final workspace contents:"
-                ls -l
-            '''
+            script {
+                def isWindows = !isUnix()
+                if (isWindows) {
+                    bat '''
+                        echo Build completed. Logging status...
+                        echo Build completed at %DATE% %TIME% >> build_status.txt
+                        echo Final workspace contents:
+                        dir
+                    '''
+                } else {
+                    sh '''
+                        echo "Build completed. Logging status..."
+                        echo "Build completed at $(date)" >> build_status.txt
+                        echo "Final workspace contents:"
+                        ls -l
+                    '''
+                }
+            }
         }
         success {
-            echo 'All scripts executed successfully.'
+            echo '✅ All scripts executed successfully.'
         }
         failure {
-            echo 'One or more stages failed. Check logs for details.'
+            echo '❌ One or more stages failed. Check logs for details.'
         }
     }
 }
