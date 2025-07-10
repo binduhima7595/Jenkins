@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Debug Environment') {
             steps {
-                echo '🔍 Checking Python availability and workspace...'
+                echo 'Checking Python availability and workspace...'
                 sh '''
                     echo "Current directory: $(pwd)"
                     echo "Python version:"
@@ -37,14 +37,14 @@ pipeline {
 
     post {
         always {
-            echo '📋 Build completed. Logging status...'
+            echo 'Build completed. Logging status...'
             sh 'echo "Build completed at $(date)" >> build_status.txt'
         }
         success {
-            echo '✅ All scripts ran successfully!'
+            echo 'All scripts ran successfully!'
         }
         failure {
-            echo '❌ One or more scripts failed.'
+            echo 'One or more scripts failed.'
         }
     }
 }
