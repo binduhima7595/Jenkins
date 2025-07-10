@@ -5,61 +5,41 @@ pipeline {
         stage('Debug Environment') {
             steps {
                 echo 'Checking Python availability and shell environment...'
-                sh '''
-                    echo "Current working directory:"
-                    pwd
+                script {
+                    def output = sh(
+                        script: '''
+                            echo "Current working directory:"
+                            pwd
 
-                    echo "Shell PATH:"
-                    echo "$PATH"
+                            echo "Shell PATH:"
+                            echo "$PATH"
 
-                    echo "Trying to locate python..."
-                    which python || echo "Python not found in PATH"
+                            echo "Trying to locate python..."
+                            which python || echo "Python not found"
 
-                    echo "Trying to run 'python --version'..."
-                    python --version || echo "Unable to execute python"
+                            echo "Trying to run 'python --version'..."
+                            python --version || echo "Unable to execute python"
 
-                    echo "Listing workspace contents..."
-                    ls -l
-                '''
-            }
-        }
-
-        stage('Run HelloWorld') {
-            steps {
-                echo 'Running helloworld.py...'
-                sh 'python helloworld.py'
-            }
-        }
-
-        stage('Run HelloWipro') {
-            steps {
-                echo 'Running hellowipro.py...'
-                sh 'python hellowipro.py'
-            }
-        }
-
-        stage('Run HelloJenkins') {
-            steps {
-                echo 'Running hellowjenkins.py...'
-                sh 'python hellowjenkins.py'
+                            echo "Listing workspace contents..."
+                            ls -l
+                        ''',
+                        returnStdout: true
+                    ).trim()
+                    echo "Debug Output:\n${output}"
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'Build completed. Logging status...'
-            sh '''
-                echo "Build completed at $(date)" >> build_status.txt
-                echo "Final workspace contents:"
-                ls -l
-            '''
+            echo 'Build completed.'
         }
         success {
-            echo 'All scripts executed successfully.'
+            echo 'Environment diagnostics completed successfully.'
         }
         failure {
-            echo 'One or more stages failed. Check logs for details.'
+            echo 'Diagnostics failed. Check Debug Output for details.'
         }
     }
 }
